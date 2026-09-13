@@ -6,6 +6,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 RESET='\033[0m'
+BLUE='\033[0;34m'
 
 # 1. 检查运行权限（必须以非 root 普通用户运行）
 if [ "$EUID" -eq 0 ]; then
@@ -94,7 +95,7 @@ ALL_PACKAGES=(
 
 
 # -------------------------------------------------------------
-# 预先清理冲突包（关键：防止 --noconfirm 时被默认选 N 阻断）
+# 预先清理冲突包jack2（关键：防止 --noconfirm 时被默认选 N 中断）
 # -------------------------------------------------------------
 if pacman -Qq jack2 &>/dev/null; then
     echo -e "${YELLOW}==> Removing legacy jack2 to avoid conflicts with pipewire-jack...${RESET}"
@@ -102,22 +103,60 @@ if pacman -Qq jack2 &>/dev/null; then
 fi
 
 # -------------------------------------------------------------
-# 执行正式安装
+# 正式安装软件
 # -------------------------------------------------------------
 echo -e "${YELLOW}==> 1. Installing all packages...${RESET}"
 sudo pacman -Syu --needed --noconfirm "${ALL_PACKAGES[@]}"
 
+# -------------------------------------------------------------
+# 配置 Rime 官方
+# -------------------------------------------------------------
+echo -e "${YELLOW}==> 2. Configuring Rime default.custom.yaml...${RESET}"
+RIME_DIR="$HOME/.local/share/fcitx5/rime"
+mkdir -p "$RIME_DIR"
 
-# -------------------------------------------------------------
-# 配置输入法全局环境变量 (/etc/environment)
-# -------------------------------------------------------------
-echo -e "${YELLOW}==> 2. Setting up IME environment variables...${RESET}"
-sudo tee -a /etc/environment > /dev/null << 'EOF'
-GTK_IM_MODULE=fcitx
-QT_IM_MODULE=fcitx
-XMODIFIERS=@im=fcitx
+cat << 'EOF' > "$RIME_DIR/default.custom.yaml"
+patch:
+  __include: rime_ice_suggestion:/
+  __patch:
+    key_binder/bindings/+:
+      - { when: paging, accept: comma, send: Page_Up }
+      - { when: has_menu, accept: period, send: Page_Down }
 EOF
 
-echo
+# -------------------------------------------------------------
+# 5. 配置 Fcitx5 profile：默认第一项英文键盘，第二项雾凇拼音
+# -------------------------------------------------------------
+echo -e "${YELLOW}==> 3. Setting up fcitx5 profile...${RESET}"
+FCITX5_CONFIG_DIR="$HOME/.config/fcitx5"
+mkdir -p "$FCITX5_CONFIG_DIR"
+
+cat << 'EOF' > "$FCITX5_CONFIG_DIR/profile"
+[Groups/0]
+Name=Default
+Default Layout=us
+DefaultIM=rime
+
+[Groups/0/Items/0]
+Name=keyboard-us
+Layout=
+
+[Groups/0/Items/1]
+Name=rime
+Layout=
+
+[GroupOrder]
+0=Default
+EOF
+
+# -------------------------------------------------------------
+# 7. 重启 Fcitx5
+# -------------------------------------------------------------
+echo -e "${YELLOW}==> 4. Deploying Rime schema...${RESET}"
+killall fcitx5 2>/dev/null || true
+sleep 1
+fcitx5 -d >/dev/null 2>&1 || true
+
 echo -e "${GREEN}=== 4-software.sh Completed Successfully! ===${RESET}"
-echo "Next step: Run 5-stow.sh to deploy your personal dotfiles."
+
+echo "${BLUE}=== next use stow to deploy your personal dotfiles ===${RESET}"
