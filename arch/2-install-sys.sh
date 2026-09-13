@@ -200,6 +200,15 @@ chmod +x /mnt/chroot_setup.sh
 echo -e "${GREEN}Entering chroot...${RESET}"
 arch-chroot /mnt /chroot_setup.sh "$HOST_NAME" "$ENABLE_HIBERNATE" "$BTRFS_DEV" "$USER_NAME"
 
+
+# 拷贝脚本仓库到新用户家目录并修正权限
+echo -e "${YELLOW}==> Copying install scripts to /home/${USER_NAME}/linux_install_scripts...${RESET}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cp -r "$SCRIPT_DIR" "/mnt/home/${USER_NAME}/linux_install_scripts"
+arch-chroot /mnt chown -R "${USER_NAME}:${USER_NAME}" "/home/${USER_NAME}/linux_install_scripts"
+
+
+
 # 6. 完成安装并提示是否卸载分区重启
 echo
 echo -e "${GREEN}=== Installation finished successfully! ===${RESET}"
