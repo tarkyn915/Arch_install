@@ -59,7 +59,7 @@ echo 'Server = https://mirrors.tuna.tsinghua.edu.cn/archlinux/$repo/os/$arch' > 
 
 # 安装系统核心基础包（含 vim、网络管理、引导工具、微码等）
 echo -e "${YELLOW}Installing base packages (including vim) with pacstrap...${RESET}"
-pacstrap -K /mnt base linux linux-firmware sudo nano vim networkmanager \
+pacstrap -K /mnt base linux linux-firmware terminus-font sudo nano vim networkmanager \
     grub efibootmgr "$UCODE" btrfs-progs git bash-completion
 
 # 生成挂载信息表 /etc/fstab
@@ -98,6 +98,10 @@ echo -e "${YELLOW}Configuring locales...${RESET}"
 sed -i -E 's/^#[[:space:]]*(en_US|zh_CN)\.UTF-8/\1.UTF-8/' /etc/locale.gen
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+# 配置控制台默认大字体（TTY 永久生效）
+echo -e "${YELLOW}Setting console font to ter-132b...${RESET}"
+echo "FONT=ter-132b" > /etc/vconsole.conf
 
 # 配置系统主机名与本地 hosts 解析
 echo "$HOST_NAME" > /etc/hostname
