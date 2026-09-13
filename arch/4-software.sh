@@ -159,4 +159,4 @@ fcitx5 -d >/dev/null 2>&1 || true
 
 echo -e "${GREEN}=== 4-software.sh Completed Successfully! ===${RESET}"
 
-echo "${BLUE}=== next use stow to deploy your personal dotfiles ===${RESET}"
+echo -e "${BLUE}=== next use stow to deploy your personal dotfiles ===${RESET}"
