@@ -92,8 +92,21 @@ ALL_PACKAGES=(
     "${PKG_IME[@]}"
 )
 
+
+# -------------------------------------------------------------
+# 预先清理冲突包（关键：防止 --noconfirm 时被默认选 N 阻断）
+# -------------------------------------------------------------
+if pacman -Qq jack2 &>/dev/null; then
+    echo -e "${YELLOW}==> Removing legacy jack2 to avoid conflicts with pipewire-jack...${RESET}"
+    sudo pacman -Rdd --noconfirm jack2
+fi
+
+# -------------------------------------------------------------
+# 执行正式安装
+# -------------------------------------------------------------
 echo -e "${YELLOW}==> 1. Installing all packages...${RESET}"
 sudo pacman -Syu --needed --noconfirm "${ALL_PACKAGES[@]}"
+
 
 # -------------------------------------------------------------
 # 配置输入法全局环境变量 (/etc/environment)
