@@ -201,12 +201,20 @@ echo -e "${GREEN}Entering chroot...${RESET}"
 arch-chroot /mnt /chroot_setup.sh "$HOST_NAME" "$ENABLE_HIBERNATE" "$BTRFS_DEV" "$USER_NAME"
 
 
-# 拷贝脚本仓库到新用户家目录并修正权限
-echo -e "${YELLOW}==> Copying install scripts to /home/${USER_NAME}/linux_install_scripts...${RESET}"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cp -r "$SCRIPT_DIR" "/mnt/home/${USER_NAME}/linux_install_scripts"
-arch-chroot /mnt chown -R "${USER_NAME}:${USER_NAME}" "/home/${USER_NAME}/linux_install_scripts"
+# 解析脚本所在仓库根（兼容软链接）
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
 
+# 先清理目标目录，避免 cp -r 重复执行时产生嵌套
+rm -rf "/mnt/home/${USER_NAME}/linux_install_scripts"
+
+# 复制脚本到新用户家目录
+cp -r "$SCRIPT_DIR" "/mnt/home/${USER_NAME}/linux_install_scripts" \
+  || { echo -e "${RED}[ERROR] 拷贝脚本失败${RESET}" >&2; exit 1; }
+
+# chroot 进新系统以内部 root 权限修正文件属主
+arch-chroot /mnt chown -R "${USER_NAME}:${USER_NAME}" \
+  "/home/${USER_NAME}/linux_install_scripts" \
+  || { echo -e "${RED}[ERROR] 修正属主失败${RESET}" >&2; exit 1; }
 
 
 # 6. 完成安装并提示是否卸载分区重启
