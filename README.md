@@ -1,13 +1,42 @@
 # Linux install scripts
 
-## arch
+> 交互式Linux基础系统安装脚本
 
-arch的脚本分为三个部分，只需要手动进行硬盘分区和挂载就可以了（默认需要配置/swap/swapfile，脚本内置休眠配置）
+## Arch Linux
 
-| 脚本             | 内容                                                         |
-| ---------------- | ------------------------------------------------------------ |
-| check            | 设置终端字体ter-132b 检查引导模式 确认时间同步               |
-| 1-install-sys.sh | 检查/mnt是否正常挂载，配置root和普通用户，配置休眠（可选），安装基本系统，配置fstab，配置新系统时区，本地化编码，配置hostname，添加普通用户进sudo组，配置archlinuxcn源，安装GRUB |
-| 2-desktop        | 目前只有一个niri+dms的环境（内置niri官方推荐的安装+几个中文字体包+sddm） |
-| 3-software.sh    | 安装基础软件集合（个人向）包含基础系统音频+视频+图片组件，ghostty终端，firefox，fcitx5+rime+雾凇 |
+目录结构
 
+```
+arch/
+├── install.sh        # base system
+└── desktop/
+    └── kde.sh        # KDE Plasma
+    └── niri.sh       # niri + dms
+```
+
+快速开始
+
+```
+git clone https://github.com/tarkyn915/linux_install.git
+
+bash install.sh
+```
+
+### 物理分区
+
+| 分区 | 大小     | 文件系统 | 挂载点  |
+| ---- | -------- | -------- | ------- |
+| `p1` | 1 GB     | FAT32    | `/boot` |
+| `p2` | 剩余全部 | Btrfs    | `/`     |
+
+### Btrfs 子卷布局
+
+| 子卷         | 挂载点        | 用途          |
+| ------------ | ------------- | ------------- |
+| `@`          | `/`           | 根文件系统    |
+| `@home`      | `/home`       | 用户数据      |
+| `@snapshots` | `/.snapshots` | 快照          |
+| `@var_log`   | `/var/log`    | 日志          |
+| `@swap`      | `/swap`       | 存放 swapfile |
+
+> 挂载参数 `noatime,compress=zstd:1,discard=async`
