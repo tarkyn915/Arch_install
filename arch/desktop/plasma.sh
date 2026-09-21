@@ -32,14 +32,15 @@ GROUP_KDE=(
     plasma-meta
     kde-utilities-meta
     kde-system-meta
-    breeze-gtk
     # 一些小组件
-    spectacle                 # 截图
-    gwenview                  # 看图
-    okular                    # PDF
+    gwenview                  # image viwer
+    haruna                    # vedio player
+    okular                    # PDF/文档阅读器
+    kdeconnect                # 手机电脑无线互联与剪贴板同步
+    # 缩略图与格式解码增强
+    kimageformats             # 补充 AVIF/HEIC 等现代图像格式解析
+    kdegraphics-thumbnailers  # RAW/矢量/设计文件缩略图
     ffmpegthumbs              # Dolphin 视频缩略图
-    kdegraphics-thumbnailers  # 图片/PDF 缩略图
-    haruna                    # 视频播放
 )
 
 # DISPLAY-MANAGER
@@ -115,11 +116,12 @@ RIME_DIR="$HOME/.local/share/fcitx5/rime"
 mkdir -p "$RIME_DIR"
 cat << 'EOF' > "$RIME_DIR/default.custom.yaml"
 patch:
-__include: rime_ice_suggestion:/
-__patch:
-key_binder/bindings/+:
-- { when: paging, accept: comma, send: Page_Up }
-- { when: has_menu, accept: period, send: Page_Down }
+  schema_list:
+    - schema: rime_ice
+    - schema: luna_pinyin_simp
+  key_binder/bindings/+:
+    - { when: paging, accept: comma, send: Page_Up }
+    - { when: has_menu, accept: period, send: Page_Down }
 EOF
 echo -e "${YELLOW}==>Setting Fcitx5 default input method (US keyboard + rime-ice)...${RESET}"
 FCITX5_CONFIG_DIR="$HOME/.config/fcitx5"

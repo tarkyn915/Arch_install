@@ -119,13 +119,14 @@ echo -e "${GREEN}====================================================${RESET}"
 echo -e "${YELLOW}==>Initializing Rime paging rules and rime-ice config...${RESET}"
 RIME_DIR="$HOME/.local/share/fcitx5/rime"
 mkdir -p "$RIME_DIR"
-cat << 'EOF' > "$RIME_DIR/default.custom.yaml"
+cat << 'EOF' > ~/.local/share/fcitx5/rime/default.custom.yaml
 patch:
-__include: rime_ice_suggestion:/
-__patch:
-key_binder/bindings/+:
-- { when: paging, accept: comma, send: Page_Up }
-- { when: has_menu, accept: period, send: Page_Down }
+  schema_list:
+    - schema: rime_ice
+    - schema: luna_pinyin_simp
+  key_binder/bindings/+:
+    - { when: paging, accept: comma, send: Page_Up }
+    - { when: has_menu, accept: period, send: Page_Down }
 EOF
 echo -e "${YELLOW}==>Setting Fcitx5 default input method (US keyboard + rime-ice)...${RESET}"
 FCITX5_CONFIG_DIR="$HOME/.config/fcitx5"
